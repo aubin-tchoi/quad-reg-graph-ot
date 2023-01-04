@@ -170,11 +170,14 @@ def full_pipeline(
         add_random_distributions(graph_copy, plot=False, nonzero_ratio=nonzero_ratio)
 
         for algo in choose_algo:
+            print(
+                f"-- Run number {n_run:>{len(str(n_runs_per_graph))}} of algo {algo:<15}:",
+                end=" ",
+            )
             runtime, (dist, quad_term, sol, sol_graph) = return_runtime(
                 choose_algo[algo]
             )(graph_copy, *args, **kwargs)
             print(
-                f"-- Run number {n_run:>{len(str(n_runs_per_graph))}} of algo {algo:<15}: "
                 f"cost: {dist:.2f}, quadratic term: {quad_term:.2f}, runtime: {runtime:.2f} s"
             )
             update_records(results[algo], dist, quad_term, sol, runtime)
