@@ -1,0 +1,62 @@
+"""
+The graphs generated for the experiments should be connected and bidirectional
+to ensure the feasibility of the optimization problem.
+"""
+import networkx as nx
+import numpy as np
+
+
+def create_path_graph(graph_size: int) -> nx.DiGraph:
+    """
+    Creates a path graph (linear graph).
+    """
+    return nx.path_graph(graph_size).to_directed()
+
+
+def create_cycle_graph(graph_size: int) -> nx.DiGraph:
+    """
+    Creates a cycle graph (circular graph).
+    """
+    return nx.cycle_graph(graph_size).to_directed()
+
+
+def create_wheel_graph(graph_size: int) -> nx.DiGraph:
+    """
+    Creates a wheel graph (see Networkx's documentation).
+    """
+    return nx.wheel_graph(graph_size).to_directed()
+
+
+def create_watts_strogatz_graph(graph_size: int) -> nx.DiGraph:
+    """
+    Creates a connected graph using the Watts–Strogatz random graph generation model.
+    """
+    return nx.connected_watts_strogatz_graph(graph_size, 3, 0.4).to_directed()
+
+
+def create_gnp_graph(graph_size: int) -> nx.DiGraph:
+    """
+    Creates a connected graph using the Erdős–Rényi random graph generation model.
+    The loop looks ugly but something similar is actually performed in nx.connected_watts_strogatz_graph.
+    """
+    n_attempts = 100
+    for i in range(n_attempts):
+        # for p > (1 + eps) ln(n) / n, the Erdős–Rényi graph should be connected almost surely
+        gnp_graph = nx.gnp_random_graph(graph_size, 2 * np.log(graph_size) / graph_size)
+        if nx.is_connected(gnp_graph):
+            return gnp_graph.to_directed()
+
+
+def create_bipartite_graph(graph_size: int) -> nx.DiGraph:
+    """
+    Creates a connected bipartite graph using the Erdős–Rényi random graph generation model.
+    The loop looks ugly but something similar is actually performed in nx.connected_watts_strogatz_graph.
+    """
+    n_attempts = 100
+    for i in range(n_attempts):
+        # for p > (1 + eps) ln(n) / n, the Erdős–Rényi graph should be connected almost surely
+        bipartite_graph = nx.bipartite.random_graph(
+            graph_size // 2, graph_size // 2, 2 * np.log(graph_size) / graph_size
+        )
+        if nx.is_connected(bipartite_graph):
+            return bipartite_graph.to_directed()
