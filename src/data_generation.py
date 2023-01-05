@@ -102,7 +102,7 @@ def add_random_distributions(
 
 
 def plot_transportation_plan(
-    graph: nx.Graph, positions: Dict[int, Tuple[float, float]]
+    graph: nx.Graph, positions: Dict[int, Tuple[float, float]], title: str = ""
 ) -> None:
     """
     Plots a graph with the associated transportation plan.
@@ -111,10 +111,12 @@ def plot_transportation_plan(
         graph: networkx graph whose nodes have attributes 'rho_0' and 'rho_1' for the distributions
             and attribute 'ot' on the edges for the value of the transportation plan.
         positions: positions of each node.
+        title: title of the plot
     """
     plt.figure()
     edge_labels = {(u, v): round(ot, 3) for u, v, ot in graph.edges.data("ot") if ot}
     nx.draw_networkx_edge_labels(graph, positions, edge_labels=edge_labels)
     nx.draw(graph, positions, with_labels=True, node_size=200, arrowsize=15)
+    plt.title(title)
 
     plt.show()

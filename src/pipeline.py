@@ -39,7 +39,7 @@ def basic_pipeline(
     print(f"Cost: {dist:.2f}, quadratic term: {quad_term:.2f}, error: {err:.2f}")
 
     if plot:
-        plot_transportation_plan(sol_graph, pos)
+        plot_transportation_plan(sol_graph, pos, algo_choice)
 
     return dist, quad_term, sol, err
 
@@ -71,7 +71,7 @@ def comparison_pipeline(
         )
 
         if plot:
-            plot_transportation_plan(sol_graph, pos)
+            plot_transportation_plan(sol_graph, pos, algo_choice)
 
         timer(f"Time spent on algo {algo_choice}")
 
@@ -102,7 +102,7 @@ def timed_pipeline(
     )
 
     if plot:
-        plot_transportation_plan(sol_graph, pos)
+        plot_transportation_plan(sol_graph, pos, algo_choice)
 
     return dist, quad_term, sol, err, runtime
 
@@ -121,9 +121,9 @@ def kanto_pipeline(graph: nx.Graph, plot: bool = True, gen_data: bool = True) ->
     )
     print(f"\nWasserstein-1 distance: {dist:.4f}")
     if plot:
-        plot_transportation_plan(uncollected_sol, pos)
+        plot_transportation_plan(uncollected_sol, pos, "Kantorovich")
         # noinspection PyTypeChecker
-        plot_transportation_plan(collected_sol, pos)
+        plot_transportation_plan(collected_sol, pos, "Kantorovich")
 
 
 def update_records(
