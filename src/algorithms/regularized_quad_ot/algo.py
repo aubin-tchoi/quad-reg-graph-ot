@@ -17,6 +17,7 @@ def regularized_quadratic_ot(
     eps: float = 1e-8,
     max_iter: int = 5000,
     verbose: bool = True,
+    always_print_stop_criteria: bool = True,
 ) -> Tuple[float, float, np.ndarray, float, nx.Graph]:
     # retrieving the constants stored on the networkx graph
     n_edges, n_nodes, edges = graph.size(), len(graph), list(graph.edges())
@@ -39,7 +40,7 @@ def regularized_quadratic_ot(
             )
 
         if np.linalg.norm(s) < eps:
-            if verbose:
+            if verbose or always_print_stop_criteria:
                 print("Stopping criteria met.")
             break
 
@@ -59,8 +60,8 @@ def regularized_quadratic_ot(
         step_sizes.append(t)
 
         # stopping if the step size becomes too small
-        if t < 1e-12:
-            if verbose:
+        if t < 1e-16:
+            if verbose or always_print_stop_criteria:
                 print("Step size too small, exiting.")
             break
 
@@ -96,7 +97,7 @@ def regularized_quadratic_ot(
             )
 
     else:
-        if verbose:
+        if verbose or always_print_stop_criteria:
             print("Maximum iteration number reached")
 
     # going back to the primal problem
