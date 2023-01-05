@@ -37,7 +37,7 @@ def compare_algo_cvx(graph_size: int = 10):
             deepcopy(bipartite_graph), ["cvxpy_reg", "algo"], alpha=alpha, verbose=False
         )
 
-    print(results)
+    print(json.dumps(results, indent=2))
 
 
 def complete_experiment() -> None:

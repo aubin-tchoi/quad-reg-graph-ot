@@ -66,7 +66,9 @@ def comparison_pipeline(
         runtime, (cost, quad_term, sol, err, sol_graph) = return_runtime(
             choose_algo[algo_choice]
         )(graph, *args, **kwargs)
-        print(f"Cost: {cost:.2f}, quadratic term: {quad_term:.2f}, error: {err:.2f}")
+        print(
+            f"Cost: {cost:.2f}, quadratic term: {quad_term:.2f}, error: {err:.2f}, runtime: {runtime:.2f}"
+        )
 
         if plot:
             plot_transportation_plan(sol_graph, pos)
