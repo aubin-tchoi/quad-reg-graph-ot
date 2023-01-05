@@ -63,9 +63,9 @@ def comparison_pipeline(
 
     for algo_choice in algo_choices:
         print(f"\nRunning algo {algo_choice}")
-        runtime, (cost, quad_term, sol, err, sol_graph) = return_runtime(choose_algo[algo_choice])(
-            graph, *args, **kwargs
-        )
+        runtime, (cost, quad_term, sol, err, sol_graph) = return_runtime(
+            choose_algo[algo_choice]
+        )(graph, *args, **kwargs)
         print(f"Cost: {cost:.2f}, quadratic term: {quad_term:.2f}, error: {err:.2f}")
 
         if plot:
@@ -167,6 +167,7 @@ def average_records(
 def full_pipeline(
     graph: nx.Graph, n_runs_per_graph: int, nonzero_ratio: float, *args, **kwargs
 ) -> Dict[str, Union[float, int, List[np.ndarray]]]:
+    exclude_sinkhorn = True
     results = {
         algo: {
             "cost": 0.0,
@@ -177,6 +178,7 @@ def full_pipeline(
             "solutions": [],
         }
         for algo in choose_algo
+        if "sinkhorn" not in algo or not exclude_sinkhorn
     }
 
     for n_run in range(n_runs_per_graph):
@@ -184,17 +186,18 @@ def full_pipeline(
         add_random_distributions(graph_copy, plot=False, nonzero_ratio=nonzero_ratio)
 
         for algo in choose_algo:
-            print(
-                f"-- Run number {n_run:>{len(str(n_runs_per_graph))}} of algo {algo:<15}:",
-                end=" ",
-            )
-            runtime, (dist, quad_term, sol, err, sol_graph) = return_runtime(
-                choose_algo[algo]
-            )(graph_copy, *args, **kwargs)
-            print(
-                f"cost: {dist:.2f}, quadratic term: {quad_term:.2f}, err: {err:.2f}, runtime: {runtime:.2f} s"
-            )
-            update_records(results[algo], dist, quad_term, err, sol, runtime)
+            if "sinkhorn" not in algo or not exclude_sinkhorn:
+                print(
+                    f"-- Run number {n_run:>{len(str(n_runs_per_graph))}} of algo {algo:<15}:",
+                    end=" ",
+                )
+                runtime, (dist, quad_term, sol, err, sol_graph) = return_runtime(
+                    choose_algo[algo]
+                )(graph_copy, *args, **kwargs)
+                print(
+                    f"cost: {dist:.2f}, quadratic term: {quad_term:.2f}, err: {err:.2f}, runtime: {runtime:.2f} s"
+                )
+                update_records(results[algo], dist, quad_term, err, sol, runtime)
         print("")
 
     for record in results.values():
