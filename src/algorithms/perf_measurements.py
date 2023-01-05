@@ -1,6 +1,6 @@
 from functools import wraps
 from time import perf_counter
-from typing import Any, Callable
+from typing import Any, Callable, Tuple
 
 
 def timeit(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -26,9 +26,10 @@ def timeit(func: Callable[..., Any]) -> Callable[..., Any]:
     return timeit_wrapper
 
 
-def return_runtime(func: Callable[..., Any]) -> Callable[..., Any]:
+def return_runtime(func: Callable[..., Any]) -> Callable[..., Tuple[float, ...]]:
     """
     Decorator that adds the execution time to the return values of the function.
+    Unfortunately this decorator does not preserve the typing of the inner function.
 
     Args:
         func: The function to time.
