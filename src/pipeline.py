@@ -71,7 +71,9 @@ def comparison_pipeline(
         )
 
         if plot:
-            plot_transportation_plan(sol_graph, pos, algo_choice)
+            plot_transportation_plan(
+                sol_graph, pos, f"{algo_choice}, alpha: {kwargs['alpha']}", savefig=True
+            )
 
         timer(f"Time spent on algo {algo_choice}")
 
