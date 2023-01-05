@@ -24,17 +24,27 @@ def run_all_algos() -> None:
         )
 
 
-def compare_algo_cvx(graph_size: int = 10):
+def compare_algo_sinkhorn(graph_size: int = 8):
     """
     Compares the algorithm with the cvxpy implementation on a bipartite graph.
     """
     np.random.seed(0)
     alphas = [10, 5, 1, 0.1, 1e-2, 1e-3, 1e-4, 1e-5]
     bipartite_graph = create_bipartite_graph(graph_size)
+
+    pos = nx.bipartite_layout(bipartite_graph, list(bipartite_graph.nodes)[:len(bipartite_graph) // 2])
+    add_random_weights(bipartite_graph, True, pos)
+    add_random_distributions(bipartite_graph, True, pos)
+
     results = {alpha: {} for alpha in alphas}
     for alpha in alphas:
         results[alpha] = comparison_pipeline(
-            deepcopy(bipartite_graph), ["cvxpy_reg", "algo"], alpha=alpha, verbose=False
+            deepcopy(bipartite_graph),
+            ["cvxpy_reg", "no_reg", "stable_sinkhorn", "algo"],
+            alpha=alpha,
+            verbose=False,
+            gen_data=False,
+            plot=True
         )
 
     print(json.dumps(results, indent=2))
