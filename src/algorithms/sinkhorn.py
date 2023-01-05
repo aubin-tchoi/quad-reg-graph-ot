@@ -83,7 +83,7 @@ def sinkhorn(
         u = a1 / (K1 * v[None, :]).sum(1)
         v = b1 / (K1 * u[:, None]).sum(0)
 
-    transportation_plan = np.diag(u) @ K @ np.diag(v)
+    transportation_plan = np.diag(u.cpu()) @ K @ np.diag(v.cpu())
 
     return after_sinkhorn(
         transportation_plan, graph, shortest_paths, cost_matrix, rho_1 - rho_0, verbose
@@ -101,7 +101,9 @@ def stable_sinkhorn(
     rho_1 = np.array(list(nx.get_node_attributes(graph, "rho_1").values()))
     cost_matrix, shortest_paths = compute_cost_matrix(graph)
 
-    C = torch.autograd.Variable(torch.from_numpy(cost_matrix).to(device))
+    C = torch.autograd.Variable(
+        torch.from_numpy(cost_matrix).type(torch.FloatTensor).to(device)
+    )
 
     def modified_cost(u_val, v_val):
         return (-C + u_val.unsqueeze(1) + v_val.unsqueeze(0)) / epsilon
@@ -131,7 +133,7 @@ def stable_sinkhorn(
             + v
         )
 
-    transportation_plan = torch.exp(modified_cost(u, v))
+    transportation_plan = torch.exp(modified_cost(u, v)).cpu()
 
     return after_sinkhorn(
         transportation_plan.numpy(),
