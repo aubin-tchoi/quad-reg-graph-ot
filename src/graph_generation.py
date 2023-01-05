@@ -51,6 +51,9 @@ def create_gnp_graph(graph_size: int) -> nx.DiGraph:
         # for p > (1 + eps) ln(n) / n, the Erdős–Rényi graph should be connected almost surely
         gnp_graph = nx.gnp_random_graph(graph_size, 2 * np.log(graph_size) / graph_size)
         if nx.is_connected(gnp_graph):
+            print(
+                f"Sparsity of the graph: {gnp_graph.size() / len(gnp_graph) ** 2 * 100:.2f}%."
+            )
             return gnp_graph.to_directed()
 
 
@@ -66,4 +69,7 @@ def create_bipartite_graph(graph_size: int) -> nx.DiGraph:
             graph_size // 2, graph_size // 2, 2 * np.log(graph_size) / graph_size
         )
         if nx.is_connected(bipartite_graph):
+            print(
+                f"Sparsity of the graph: {bipartite_graph.size() / len(bipartite_graph) ** 2 * 100:.2f}%."
+            )
             return bipartite_graph.to_directed()
