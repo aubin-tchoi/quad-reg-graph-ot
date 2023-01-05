@@ -58,6 +58,12 @@ def regularized_quadratic_ot(
         t = min(t_quadratic, t_active_set)
         step_sizes.append(t)
 
+        # stopping if the step size becomes too small
+        if t < 1e-12:
+            if verbose:
+                print("Step size too small, exiting.")
+            break
+
         # updating the dual variable
         p += t * s
 
