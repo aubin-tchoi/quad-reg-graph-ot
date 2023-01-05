@@ -25,7 +25,7 @@ def basic_pipeline(
     gen_data: bool = True,
     *args,
     **kwargs,
-) -> Tuple[float, float, np.ndarray]:
+) -> Tuple[float, float, np.ndarray, float]:
     pos = nx.spectral_layout(graph)
 
     if gen_data:
@@ -33,13 +33,15 @@ def basic_pipeline(
         add_random_distributions(graph, plot, pos)
 
     print(f"\nRunning algo {algo_choice}")
-    dist, quad_term, sol, sol_graph = choose_algo[algo_choice](graph, *args, **kwargs)
-    print(f"Cost: {dist:.2f}, quadratic term: {quad_term:.2f}")
+    dist, quad_term, sol, err, sol_graph = choose_algo[algo_choice](
+        graph, *args, **kwargs
+    )
+    print(f"Cost: {dist:.2f}, quadratic term: {quad_term:.2f}, error: {err:.2f}")
 
     if plot:
         plot_transportation_plan(sol_graph, pos)
 
-    return dist, quad_term, sol
+    return dist, quad_term, sol, err
 
 
 def comparison_pipeline(
@@ -49,7 +51,7 @@ def comparison_pipeline(
     gen_data: bool = True,
     *args,
     **kwargs,
-) -> Dict[str, Tuple[float, float, np.ndarray]]:
+) -> Dict[str, Dict[str, Union[float, float, np.ndarray, float]]]:
     timer = checkpoint()
     results = {}
     pos = nx.spectral_layout(graph)
@@ -61,39 +63,46 @@ def comparison_pipeline(
 
     for algo_choice in algo_choices:
         print(f"\nRunning algo {algo_choice}")
-        results[algo_choice] = choose_algo[algo_choice](graph, *args, **kwargs)
-        print(
-            f"Cost: {results[algo_choice][0]:.2f}, quadratic term: {results[algo_choice][1]:.2f}"
+        runtime, (cost, quad_term, sol, err, sol_graph) = return_runtime(choose_algo[algo_choice])(
+            graph, *args, **kwargs
         )
+        print(f"Cost: {cost:.2f}, quadratic term: {quad_term:.2f}, error: {err:.2f}")
 
         if plot:
-            plot_transportation_plan(results[algo_choice][3], pos)
+            plot_transportation_plan(sol_graph, pos)
 
         timer(f"Time spent on algo {algo_choice}")
+
+        results[algo_choice] = {
+            "cost": cost,
+            "quadratic_term": quad_term,
+            "error": err,
+            "runtime": runtime,
+        }
 
     return results
 
 
 def timed_pipeline(
     graph: nx.Graph, algo_choice: str, plot: bool = True, *args, **kwargs
-) -> Tuple[float, float, np.ndarray, int]:
+) -> Tuple[float, float, np.ndarray, float, float]:
     pos = nx.spectral_layout(graph)
 
     add_random_weights(graph, plot, pos)
     add_random_distributions(graph, plot, pos)
 
     print(f"Running algo {algo_choice}")
-    runtime, (dist, quad_term, sol, sol_graph) = return_runtime(
+    runtime, (dist, quad_term, sol, err, sol_graph) = return_runtime(
         choose_algo[algo_choice]
     )(graph, *args, **kwargs)
     print(
-        f"Cost: {dist:.2f}, quadratic term: {quad_term:.2f}, runtime: {runtime:.2f} s"
+        f"Cost: {dist:.2f}, quadratic term: {quad_term:.2f}, error: {err:.2f}, runtime: {runtime:.2f} s"
     )
 
     if plot:
         plot_transportation_plan(sol_graph, pos)
 
-    return dist, quad_term, sol, runtime
+    return dist, quad_term, sol, err, runtime
 
 
 @timeit
@@ -111,6 +120,7 @@ def kanto_pipeline(graph: nx.Graph, plot: bool = True, gen_data: bool = True) ->
     print(f"\nWasserstein-1 distance: {dist:.4f}")
     if plot:
         plot_transportation_plan(uncollected_sol, pos)
+        # noinspection PyTypeChecker
         plot_transportation_plan(collected_sol, pos)
 
 
@@ -118,17 +128,19 @@ def update_records(
     records: Dict[str, Union[float, int, List[np.ndarray]]],
     dist: float,
     quadratic_term: float,
+    error: float,
     solution: np.ndarray,
-    runtime: int,
+    runtime: float,
 ) -> None:
     """
     Adds a record to a dict of records taking into account unsuccessful runs.
     """
     if dist < 1e-12 or dist == np.inf or np.isnan(dist):
-        records["errors"] += 1
+        records["fails"] += 1
     else:
         records["cost"] += dist
         records["quadratic_term"] += quadratic_term
+        records["error"] += error
     records["runtime"] += runtime
     records["solutions"].append(solution)
 
@@ -141,11 +153,12 @@ def average_records(
     Averages the values of the costs and quadratic terms measured by dividing by the number of successful runs.
     Also updates the average runtime.
     """
-    n_successful_runs = n_runs_per_graph > records["errors"]
+    n_successful_runs = n_runs_per_graph > records["fails"]
 
     if n_successful_runs > 0:
         records["cost"] /= n_successful_runs
         records["quadratic_term"] /= n_successful_runs
+        records["error"] /= n_successful_runs
 
     records["runtime"] /= n_runs_per_graph
 
@@ -158,8 +171,9 @@ def full_pipeline(
         algo: {
             "cost": 0.0,
             "quadratic_term": 0.0,
+            "error": 0.0,
             "runtime": 0,
-            "errors": 0,
+            "fails": 0,
             "solutions": [],
         }
         for algo in choose_algo
@@ -174,13 +188,13 @@ def full_pipeline(
                 f"-- Run number {n_run:>{len(str(n_runs_per_graph))}} of algo {algo:<15}:",
                 end=" ",
             )
-            runtime, (dist, quad_term, sol, sol_graph) = return_runtime(
+            runtime, (dist, quad_term, sol, err, sol_graph) = return_runtime(
                 choose_algo[algo]
             )(graph_copy, *args, **kwargs)
             print(
-                f"cost: {dist:.2f}, quadratic term: {quad_term:.2f}, runtime: {runtime:.2f} s"
+                f"cost: {dist:.2f}, quadratic term: {quad_term:.2f}, err: {err:.2f}, runtime: {runtime:.2f} s"
             )
-            update_records(results[algo], dist, quad_term, sol, runtime)
+            update_records(results[algo], dist, quad_term, err, sol, runtime)
         print("")
 
     for record in results.values():

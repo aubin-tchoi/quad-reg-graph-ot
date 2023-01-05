@@ -13,7 +13,7 @@ from src.algorithms.graph_utils import (
 
 def regularized_j_wasserstein_1(
     graph: nx.Graph, alpha: float, verbose: bool = True
-) -> Tuple[float, float, np.ndarray, nx.Graph]:
+) -> Tuple[float, float, np.ndarray, float, nx.Graph]:
     """
     Computes the regularized Wasserstein-1 distance on a weighted graph that contains two distributions.
     Relies on an alternative formulation (the variable indicates the flow on each edge).
@@ -42,5 +42,6 @@ def regularized_j_wasserstein_1(
 
     cost = cost_vector @ flow.value
     quadratic_term = float(np.sum(np.square(flow.value)))
+    err = np.linalg.norm(incidence_matrix.T @ flow.value - f)
 
-    return cost, quadratic_term, np.array(flow.value), sol_graph
+    return cost, quadratic_term, np.array(flow.value), err, sol_graph

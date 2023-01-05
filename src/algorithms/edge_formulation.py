@@ -14,7 +14,7 @@ from src.algorithms.graph_utils import (
 # noinspection PyUnusedLocal
 def j_wasserstein_1(
     graph: nx.Graph, verbose: bool = True, alpha: float = 1.0
-) -> Tuple[float, float, np.ndarray, nx.Graph]:
+) -> Tuple[float, float, np.ndarray, float, nx.Graph]:
     """
     Computes the Wasserstein-1 distance on a weighted graph that contains two distributions.
     Relies on an alternative formulation (the variable indicates the flow on each edge).
@@ -40,5 +40,6 @@ def j_wasserstein_1(
     sol_graph = recreate_ot_graph(graph, flow.value)
 
     quadratic_term = float(np.sum(np.square(flow.value)))
+    err = np.linalg.norm(incidence_matrix.T @ flow.value - f)
 
-    return problem.value, quadratic_term, flow.value, sol_graph
+    return problem.value, quadratic_term, flow.value, err, sol_graph

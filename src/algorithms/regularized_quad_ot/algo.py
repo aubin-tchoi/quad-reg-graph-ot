@@ -17,7 +17,7 @@ def regularized_quadratic_ot(
     eps: float = 1e-8,
     max_iter: int = 5000,
     verbose: bool = True,
-) -> Tuple[float, float, np.ndarray, nx.Graph]:
+) -> Tuple[float, float, np.ndarray, float, nx.Graph]:
     # retrieving the constants stored on the networkx graph
     n_edges, n_nodes, edges = graph.size(), len(graph), list(graph.edges())
     f, cost_vector, incidence_matrix = extract_graph_info(graph)
@@ -39,7 +39,8 @@ def regularized_quadratic_ot(
             )
 
         if np.linalg.norm(s) < eps:
-            print("Stopping criteria met.")
+            if verbose:
+                print("Stopping criteria met.")
             break
 
         if n_iter % 2 == 0:
@@ -89,7 +90,8 @@ def regularized_quadratic_ot(
             )
 
     else:
-        print("Maximum iteration number reached")
+        if verbose:
+            print("Maximum iteration number reached")
 
     # going back to the primal problem
     J = np.maximum(
@@ -110,5 +112,6 @@ def regularized_quadratic_ot(
 
     cost = cost_vector @ J
     quadratic_term = float(np.sum(np.square(J)))
+    err = np.linalg.norm(incidence_matrix.T @ J - f)
 
-    return cost, quadratic_term, J, sol_graph
+    return cost, quadratic_term, J, err, sol_graph

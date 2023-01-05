@@ -13,7 +13,7 @@ def t_wasserstein_1(
     verbose: bool = True,
     return_uncollected_graph: bool = False,
     alpha: float = 1.0,
-) -> Tuple[float, float, np.ndarray, nx.Graph]:
+) -> Tuple[float, float, np.ndarray, float, nx.Graph]:
     """
     Computes the Wasserstein-1 distance on a weighted graph that contains two distributions.
     Relies on the Kantorovich formulation (the variable is the transportation map between each pair of nodes).
@@ -79,5 +79,6 @@ def t_wasserstein_1(
             problem.value,
             quadratic_term,
             flow,
+            0.,
             collected_graph,
         )

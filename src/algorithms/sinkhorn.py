@@ -7,7 +7,7 @@ import torch
 from src.algorithms.utils import compute_cost_matrix, collect_graph
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-print(device)
+print(f"Running Sinkhorn on {device}.")
 
 
 def after_sinkhorn(
@@ -15,8 +15,9 @@ def after_sinkhorn(
     graph: nx.Graph,
     shortest_paths: List[List[List[int]]],
     cost_matrix: np.ndarray,
+    f: np.ndarray,
     verbose: bool,
-):
+) -> Tuple[float, float, np.ndarray, float, nx.Graph]:
     if verbose:
         nonzero = np.count_nonzero(transportation_plan)
         print(
@@ -42,18 +43,19 @@ def after_sinkhorn(
     flow = np.array(list(nx.get_edge_attributes(collected_graph, "ot").values()))
     cost = float(np.sum(cost_matrix * transportation_plan))
     quadratic_term = float(np.sum(np.square(flow)))
+    err = np.linalg.norm(nx.incidence_matrix(graph, oriented=True).toarray() @ flow - f)
 
     if verbose:
         nonzero = np.count_nonzero(flow)
         print(f"Optimal flow (number of nonzero: {nonzero} / {graph.size()}):")
         print(np.round(flow, 2))
 
-    return cost, quadratic_term, flow, collected_graph
+    return cost, quadratic_term, flow, err, collected_graph
 
 
 def sinkhorn(
     graph: nx.Graph, alpha: float, verbose: bool = True
-) -> Tuple[float, float, np.ndarray, nx.Graph]:
+) -> Tuple[float, float, np.ndarray, float, nx.Graph]:
 
     epsilon = alpha
 
@@ -83,12 +85,14 @@ def sinkhorn(
 
     transportation_plan = np.diag(u) @ K @ np.diag(v)
 
-    return after_sinkhorn(transportation_plan, graph, shortest_paths, cost_matrix, verbose)
+    return after_sinkhorn(
+        transportation_plan, graph, shortest_paths, cost_matrix, rho_1 - rho_0, verbose
+    )
 
 
 def stable_sinkhorn(
     graph: nx.Graph, alpha: float, verbose: bool = True
-) -> Tuple[float, float, np.ndarray, nx.Graph]:
+) -> Tuple[float, float, np.ndarray, float, nx.Graph]:
 
     epsilon = alpha
 
@@ -108,7 +112,6 @@ def stable_sinkhorn(
             torch.exp(A - torch.max(A)).sum(1, keepdim=True) + 1e-6
         ) + torch.max(A)
 
-    K = np.exp(-(cost_matrix**2) / epsilon)
     u = torch.ones(n_nodes)
     v = torch.ones(n_nodes)
 
@@ -130,4 +133,11 @@ def stable_sinkhorn(
 
     transportation_plan = torch.exp(modified_cost(u, v))
 
-    return after_sinkhorn(transportation_plan.numpy(), graph, shortest_paths, cost_matrix, verbose)
+    return after_sinkhorn(
+        transportation_plan.numpy(),
+        graph,
+        shortest_paths,
+        cost_matrix,
+        rho_1 - rho_0,
+        verbose,
+    )
