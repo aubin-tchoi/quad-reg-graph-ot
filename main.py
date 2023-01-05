@@ -74,13 +74,13 @@ def complete_experiment() -> None:
     identifier += "_" if identifier else ""
 
     pickle_file_path = (
-        f"data/results_{identifier}{f'{datetime.now():%m-%d-%H_%M}'}.pickle"
+        f"data/results_{identifier}{f'{datetime.now():%m_%d-%H_%M}'}.pickle"
     )
     print(f"Saving the data in a pickle file '{pickle_file_path}'.")
     with open(pickle_file_path, "wb+") as handle:
         pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    json_file_path = f"data/results_{identifier}{f'{datetime.now():%m-%d-%H_%M}'}.json"
+    json_file_path = f"data/results_{identifier}{f'{datetime.now():%m_%d-%H_%M}'}.json"
     print(f"Saving the data in a json file '{json_file_path}'.")
     # removing unserializable np.ndarray
     for graph_size in results.values():
