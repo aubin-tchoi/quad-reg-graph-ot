@@ -7,10 +7,12 @@ from datetime import datetime
 
 import networkx as nx
 import numpy as np
+import seaborn as sns
 
 from src import *
 
 warnings.filterwarnings("ignore")
+sns.set_theme()
 
 
 def run_all_algos() -> None:
@@ -43,7 +45,7 @@ def compare_algo_sinkhorn(graph_size: int = 6, graph_type: str = "path"):
     )
 
     if graph_type == "bipartite":
-        pos = nx.bipartite_layout(graph, list(graph.nodes)[:len(graph) // 2])
+        pos = nx.bipartite_layout(graph, list(graph.nodes)[: len(graph) // 2])
         add_random_weights(graph, True, pos)
         add_random_distributions(graph, True, pos)
     else:
