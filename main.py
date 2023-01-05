@@ -5,6 +5,7 @@ import warnings
 from copy import deepcopy
 from datetime import datetime
 
+import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import seaborn as sns
@@ -13,6 +14,39 @@ from src import *
 
 warnings.filterwarnings("ignore")
 sns.set_theme()
+
+
+def draw_non_uniqueness_example() -> None:
+    """
+    Draws a small graph that can be used as an example to display
+    the non-uniqueness of the solutions of the non-regularized problem.
+    """
+    graph = nx.cycle_graph(3)
+
+    positions = nx.circular_layout(graph)
+
+    graph.edges[0, 1]["weight"] = .5
+    graph.edges[1, 2]["weight"] = .5
+    graph.edges[0, 2]["weight"] = 1.
+
+    graph.nodes[0]["f"] = -1
+    graph.nodes[1]["f"] = 0
+    graph.nodes[2]["f"] = 1
+
+    edge_labels = {(u, v): weight for u, v, weight in graph.edges.data("weight")}
+    node_labels = {node: graph.nodes[node]["f"] for node in graph.nodes()}
+
+    plt.figure()
+    nx.draw_networkx_edge_labels(graph, positions, edge_labels=edge_labels, font_size=20)
+    nx.draw_networkx_labels(graph, positions, labels=node_labels, font_size=20)
+    nx.draw(
+        graph,
+        positions,
+        node_color=list(node_labels.values()),
+        node_size=2000,
+        cmap=plt.cm.Oranges,
+    )
+    plt.show()
 
 
 def run_all_algos() -> None:
