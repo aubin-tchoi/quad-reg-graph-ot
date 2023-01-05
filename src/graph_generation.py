@@ -27,6 +27,13 @@ def create_wheel_graph(graph_size: int) -> nx.DiGraph:
     return nx.wheel_graph(graph_size).to_directed()
 
 
+def create_complete_graph(graph_size: int) -> nx.DiGraph:
+    """
+    Creates a complete graph.
+    """
+    return nx.complete_graph(graph_size).to_directed()
+
+
 def create_watts_strogatz_graph(graph_size: int) -> nx.DiGraph:
     """
     Creates a connected graph using the Watts–Strogatz random graph generation model.

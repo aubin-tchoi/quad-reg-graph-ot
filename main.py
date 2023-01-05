@@ -37,6 +37,8 @@ def compare_algo_sinkhorn(graph_size: int = 6, graph_type: str = "path"):
         if graph_type == "cycle"
         else create_path_graph(graph_size)
         if graph_type == "path"
+        else create_complete_graph(graph_size)
+        if graph_type == "complete"
         else create_gnp_graph(graph_size)
     )
 
