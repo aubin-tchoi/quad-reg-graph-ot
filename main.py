@@ -24,28 +24,40 @@ def run_all_algos() -> None:
         )
 
 
-def compare_algo_sinkhorn(graph_size: int = 8):
+def compare_algo_sinkhorn(graph_size: int = 6, graph_type: str = "path"):
     """
     Compares the algorithm with the cvxpy implementation on a bipartite graph.
     """
     np.random.seed(0)
     alphas = [10, 5, 1, 0.1, 1e-2, 1e-3, 1e-4, 1e-5]
-    bipartite_graph = create_bipartite_graph(graph_size)
+    graph = (
+        create_bipartite_graph(graph_size)
+        if graph_type == "bipartite"
+        else create_cycle_graph(graph_size)
+        if graph_type == "cycle"
+        else create_path_graph(graph_size)
+        if graph_type == "path"
+        else create_gnp_graph(graph_size)
+    )
 
-    pos = nx.bipartite_layout(bipartite_graph, list(bipartite_graph.nodes)[:len(bipartite_graph) // 2])
-    add_random_weights(bipartite_graph, True, pos)
-    add_random_distributions(bipartite_graph, True, pos)
+    if graph_type == "bipartite":
+        pos = nx.bipartite_layout(graph, list(graph.nodes)[:len(graph) // 2])
+        add_random_weights(graph, True, pos)
+        add_random_distributions(graph, True, pos)
+    else:
+        add_random_weights(graph)
+        add_random_distributions(graph)
 
     results = {alpha: {} for alpha in alphas}
     for alpha in alphas:
-        print(f"\n ---- alpha: {alpha} ----\n")
+        print(f"\n ---- alpha: {alpha} ----")
         results[alpha] = comparison_pipeline(
-            deepcopy(bipartite_graph),
+            deepcopy(graph),
             ["cvxpy_reg", "no_reg", "stable_sinkhorn", "algo"],
             alpha=alpha,
             verbose=False,
             gen_data=False,
-            plot=True
+            plot=True,
         )
 
     print(json.dumps(results, indent=2))
