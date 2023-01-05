@@ -38,6 +38,7 @@ def compare_algo_sinkhorn(graph_size: int = 8):
 
     results = {alpha: {} for alpha in alphas}
     for alpha in alphas:
+        print(f"\n ---- alpha: {alpha} ----\n")
         results[alpha] = comparison_pipeline(
             deepcopy(bipartite_graph),
             ["cvxpy_reg", "no_reg", "stable_sinkhorn", "algo"],
