@@ -1,14 +1,15 @@
-from typing import Tuple
+from typing import Tuple, Optional
 
+import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
+from src.algorithms.graph_utils import extract_graph_info
 from src.algorithms.regularized_quad_ot.algo_utils import (
     initialize_algorithm,
     edge_added_to_active_set,
     edge_removed_from_active_set,
 )
-from src.algorithms.graph_utils import extract_graph_info
 
 
 def regularized_quadratic_ot(
@@ -18,6 +19,8 @@ def regularized_quadratic_ot(
     max_iter: int = 5000,
     verbose: bool = True,
     always_print_stop_criteria: bool = True,
+    plot_evolution: bool = True,
+    optimal_sol: Optional[np.ndarray] = None,
 ) -> Tuple[float, float, np.ndarray, float, nx.Graph]:
     # retrieving the constants stored on the networkx graph
     n_edges, n_nodes, edges = graph.size(), len(graph), list(graph.edges())
@@ -28,18 +31,20 @@ def regularized_quadratic_ot(
         incidence_matrix, cost_vector, n_nodes, edges
     )
     step_sizes, gradient_norms = [], []
+    constraint_violation, dist_with_opt, costs = [], [], []
 
     for n_iter in range(max_iter):
         # line search direction
         s = alpha * f - incidence_matrix.T @ M @ v
-        gradient_norms.append(np.linalg.norm(s))
+        gradient_norm = np.linalg.norm(s)
+        gradient_norms.append(gradient_norm)
 
         if verbose:
             print(
-                f"iteration {n_iter:>{len(str(max_iter))}}, gradient norm: {np.linalg.norm(s):.4f}"
+                f"iteration {n_iter:>{len(str(max_iter))}}, gradient norm: {gradient_norm:.4f}"
             )
 
-        if np.linalg.norm(s) < eps:
+        if gradient_norm < eps:
             if verbose or always_print_stop_criteria:
                 print("Stopping criteria met.")
             break
@@ -65,8 +70,18 @@ def regularized_quadratic_ot(
                 print("Step size too small, exiting.")
             break
 
-        # updating the dual variable
+        # step update
         p += t * s
+
+        if plot_evolution:
+            J = np.maximum(
+                (incidence_matrix @ p - cost_vector) / alpha,
+                np.zeros(n_edges),
+            )
+            costs.append(cost_vector @ J)
+            constraint_violation.append(np.linalg.norm(incidence_matrix.T @ J - f))
+            if optimal_sol is not None:
+                dist_with_opt.append(np.linalg.norm(J - optimal_sol))
 
         previous_active_edges = active_edges.copy()
 
@@ -120,5 +135,27 @@ def regularized_quadratic_ot(
     cost = cost_vector @ J
     quadratic_term = float(np.sum(np.square(J)))
     err = np.linalg.norm(incidence_matrix.T @ J - f)
+
+    if plot_evolution:
+        fig, axs = plt.subplots(1, 5, figsize=(20, 4))
+
+        axs[0].plot(step_sizes, label=alpha)
+        axs[0].set(title="Step size evolution", xlabel="$k$", ylabel="$t_k$")
+
+        axs[1].plot(gradient_norms, label=alpha)
+        axs[1].set(title="Gradient norm evolution", xlabel="$k$", ylabel="$||s_k||$")
+
+        axs[2].plot(costs, label=alpha)
+        axs[2].set(title="Primal cost", xlabel="$k$", ylabel="$||c^T J||$")
+
+        axs[3].plot(constraint_violation, label=alpha)
+        axs[3].set(title="Constraint violation", xlabel="$k$", ylabel="$||D^T J - f||$")
+
+        axs[4].plot(dist_with_opt, label=alpha)
+        axs[4].set(title="Distance to optimal", xlabel="$k$", ylabel="$||J - J^*||$")
+
+        for ax in axs:
+            ax.legend()
+        plt.show()
 
     return cost, quadratic_term, J, err, sol_graph
