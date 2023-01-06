@@ -167,6 +167,20 @@ def average_records(
     records["runtime"] /= n_runs_per_graph
 
 
+def remove_np_arrays(
+    records: Dict[
+        int, Dict[float, Dict[str, Dict[str, Union[float, int, List[np.ndarray]]]]]
+    ],
+) -> None:
+    """
+    Removes unserializable np.ndarray.
+    """
+    for graph_size in records.values():
+        for alpha in graph_size.values():
+            for algo in alpha.values():
+                algo.pop("solutions")
+
+
 @timeit
 def full_pipeline(
     graph: nx.Graph, n_runs_per_graph: int, nonzero_ratio: float, *args, **kwargs

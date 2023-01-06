@@ -25,9 +25,9 @@ def draw_non_uniqueness_example() -> None:
 
     positions = nx.circular_layout(graph)
 
-    graph.edges[0, 1]["weight"] = .5
-    graph.edges[1, 2]["weight"] = .5
-    graph.edges[0, 2]["weight"] = 1.
+    graph.edges[0, 1]["weight"] = 0.5
+    graph.edges[1, 2]["weight"] = 0.5
+    graph.edges[0, 2]["weight"] = 1.0
 
     graph.nodes[0]["f"] = -1
     graph.nodes[1]["f"] = 0
@@ -37,7 +37,9 @@ def draw_non_uniqueness_example() -> None:
     node_labels = {node: graph.nodes[node]["f"] for node in graph.nodes()}
 
     plt.figure()
-    nx.draw_networkx_edge_labels(graph, positions, edge_labels=edge_labels, font_size=20)
+    nx.draw_networkx_edge_labels(
+        graph, positions, edge_labels=edge_labels, font_size=20
+    )
     nx.draw_networkx_labels(graph, positions, labels=node_labels, font_size=20)
     nx.draw(
         graph,
@@ -66,17 +68,7 @@ def compare_algo_sinkhorn(graph_size: int = 6, graph_type: str = "path"):
     """
     np.random.seed(0)
     alphas = [10, 5, 1, 0.1, 1e-2, 1e-3, 1e-4, 1e-5]
-    graph = (
-        create_bipartite_graph(graph_size)
-        if graph_type == "bipartite"
-        else create_cycle_graph(graph_size)
-        if graph_type == "cycle"
-        else create_path_graph(graph_size)
-        if graph_type == "path"
-        else create_complete_graph(graph_size)
-        if graph_type == "complete"
-        else create_gnp_graph(graph_size)
-    )
+    graph = create_graph(graph_size, graph_type)
 
     if graph_type == "bipartite":
         pos = nx.bipartite_layout(graph, list(graph.nodes)[: len(graph) // 2])
@@ -143,11 +135,7 @@ def complete_experiment() -> None:
 
     json_file_path = f"data/results_{identifier}{f'{datetime.now():%m_%d-%H_%M}'}.json"
     print(f"Saving the data in a json file '{json_file_path}'.")
-    # removing unserializable np.ndarray
-    for graph_size in results.values():
-        for alpha in graph_size.values():
-            for algo in alpha.values():
-                algo.pop("solutions")
+    remove_np_arrays(results)
 
     with open(json_file_path, "w+", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=4)

@@ -8,5 +8,6 @@ from .graph_generation import (
     create_wheel_graph,
     create_watts_strogatz_graph,
     create_complete_graph,
+    create_graph,
 )
 from .pipeline import basic_pipeline, kanto_pipeline, comparison_pipeline, full_pipeline

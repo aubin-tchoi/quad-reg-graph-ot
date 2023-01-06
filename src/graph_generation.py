@@ -73,3 +73,20 @@ def create_bipartite_graph(graph_size: int) -> nx.DiGraph:
                 f"Sparsity of the graph: {bipartite_graph.size() / len(bipartite_graph) ** 2 * 100:.2f}%."
             )
             return bipartite_graph.to_directed()
+
+
+def create_graph(graph_size: int, graph_type: str) -> nx.DiGraph():
+    """
+    Creates a graph using one of the functions above depending on the input graph type.
+    """
+    return (
+        create_bipartite_graph(graph_size)
+        if graph_type == "bipartite"
+        else create_cycle_graph(graph_size)
+        if graph_type == "cycle"
+        else create_path_graph(graph_size)
+        if graph_type == "path"
+        else create_complete_graph(graph_size)
+        if graph_type == "complete"
+        else create_gnp_graph(graph_size)
+    )
