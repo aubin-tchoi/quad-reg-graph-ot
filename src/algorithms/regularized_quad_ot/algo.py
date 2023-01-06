@@ -30,7 +30,7 @@ def regularized_quadratic_ot(
     p, v, M, L, N, R, active_edges = initialize_algorithm(
         incidence_matrix, cost_vector, n_nodes, edges
     )
-    step_sizes, gradient_norms = [], []
+    step_sizes, gradient_norms, n_non_zeros = [], [], []
     constraint_violation, dist_with_opt, costs = [], [], []
 
     for n_iter in range(max_iter):
@@ -62,7 +62,7 @@ def regularized_quadratic_ot(
         h = -v / (incidence_matrix @ s)
         t_active_set = np.amin(np.where(h > 0, h, np.inf))
         t = min(t_quadratic, t_active_set)
-        step_sizes.append(t)
+        step_sizes.append(float(t))
 
         # stopping if the step size becomes too small
         if t < 1e-16:
@@ -78,7 +78,8 @@ def regularized_quadratic_ot(
                 (incidence_matrix @ p - cost_vector) / alpha,
                 np.zeros(n_edges),
             )
-            costs.append(cost_vector @ J)
+            n_non_zeros.append(np.count_nonzero(J) / n_edges)
+            costs.append(float(cost_vector @ J))
             constraint_violation.append(np.linalg.norm(incidence_matrix.T @ J - f))
             if optimal_sol is not None:
                 dist_with_opt.append(np.linalg.norm(J - optimal_sol))
@@ -137,22 +138,25 @@ def regularized_quadratic_ot(
     err = np.linalg.norm(incidence_matrix.T @ J - f)
 
     if plot_evolution:
-        fig, axs = plt.subplots(1, 5, figsize=(20, 4))
+        fig, axs = plt.subplots(2, 3, figsize=(20, 4))
 
-        axs[0].plot(step_sizes, label=alpha)
-        axs[0].set(title="Step size evolution", xlabel="$k$", ylabel="$t_k$")
+        axs[0][0].plot(step_sizes, label=alpha)
+        axs[0][0].set(title="Step size evolution", xlabel="$k$", ylabel="$t_k$")
 
-        axs[1].plot(gradient_norms, label=alpha)
-        axs[1].set(title="Gradient norm evolution", xlabel="$k$", ylabel="$||s_k||$")
+        axs[0][1].plot(gradient_norms, label=alpha)
+        axs[0][1].set(title="Gradient norm evolution", xlabel="$k$", ylabel="$||s_k||$")
 
-        axs[2].plot(costs, label=alpha)
-        axs[2].set(title="Primal cost", xlabel="$k$", ylabel="$||c^T J||$")
+        axs[0][2].plot(n_non_zeros, label=alpha)
+        axs[0][2].set(title="Sparsity", xlabel="$k$", ylabel=r"$\frac{||J_k||_0}{|V|}$")
 
-        axs[3].plot(constraint_violation, label=alpha)
-        axs[3].set(title="Constraint violation", xlabel="$k$", ylabel="$||D^T J - f||$")
+        axs[1][0].plot(costs, label=alpha)
+        axs[1][0].set(title="Primal cost", xlabel="$k$", ylabel="$||c^T J_k||$")
 
-        axs[4].plot(dist_with_opt, label=alpha)
-        axs[4].set(title="Distance to optimal", xlabel="$k$", ylabel="$||J - J^*||$")
+        axs[1][1].plot(constraint_violation, label=alpha)
+        axs[1][1].set(title="Constraint violation", xlabel="$k$", ylabel="$||D^T J_k - f||$")
+
+        axs[1][2].plot(dist_with_opt, label=alpha)
+        axs[1][2].set(title="Distance to an optimal solution", xlabel="$k$", ylabel="$||J_k - J^*||$")
 
         for ax in axs:
             ax.legend()
