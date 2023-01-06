@@ -93,6 +93,39 @@ def compare_algo_sinkhorn(graph_size: int = 6, graph_type: str = "path"):
     print(json.dumps(results, indent=2))
 
 
+def monitor_algo_evolution(graph_size: int = 60, graph_type: str = "bipartite"):
+    """
+    Plots various graph describing the behavior of the algorithm over the iterations.
+    """
+    np.random.seed(0)
+    alphas = [10, 5, 1, 0.1, 1e-2, 1e-3, 1e-4, 1e-5]
+    graph = create_graph(graph_size, graph_type)
+
+    add_random_weights(graph, False)
+    add_random_distributions(graph, False)
+
+    results = {alpha: {} for alpha in alphas}
+    for alpha in alphas:
+        print(f"\n ---- alpha: {alpha} ----")
+        _, __, sol, ___ = basic_pipeline(
+            deepcopy(graph), "cvxpy_reg", alpha=alpha, plot=False
+        )
+        results[alpha] = basic_pipeline(
+            deepcopy(graph),
+            "algo",
+            alpha=alpha,
+            verbose=True,
+            gen_data=False,
+            plot=False,
+            optimal_sol=sol,
+        )
+
+    # removing unserializable np.ndarray
+    for alpha in results.values():
+        alpha.pop("solutions")
+    print(json.dumps(results, indent=2))
+
+
 def complete_experiment() -> None:
     """
     Runs an experiment with various graph sizes, various values of alpha

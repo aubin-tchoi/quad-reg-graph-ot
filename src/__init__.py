@@ -10,4 +10,10 @@ from .graph_generation import (
     create_complete_graph,
     create_graph,
 )
-from .pipeline import basic_pipeline, kanto_pipeline, comparison_pipeline, full_pipeline
+from .pipeline import (
+    basic_pipeline,
+    kanto_pipeline,
+    comparison_pipeline,
+    full_pipeline,
+    remove_np_arrays,
+)

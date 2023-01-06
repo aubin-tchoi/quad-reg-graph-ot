@@ -138,7 +138,7 @@ def regularized_quadratic_ot(
     err = np.linalg.norm(incidence_matrix.T @ J - f)
 
     if plot_evolution:
-        fig, axs = plt.subplots(2, 3, figsize=(20, 4))
+        fig, axs = plt.subplots(2, 3, figsize=(20, 15))
 
         axs[0][0].plot(step_sizes, label=alpha)
         axs[0][0].set(title="Step size evolution", xlabel="$k$", ylabel="$t_k$")
@@ -153,13 +153,20 @@ def regularized_quadratic_ot(
         axs[1][0].set(title="Primal cost", xlabel="$k$", ylabel="$||c^T J_k||$")
 
         axs[1][1].plot(constraint_violation, label=alpha)
-        axs[1][1].set(title="Constraint violation", xlabel="$k$", ylabel="$||D^T J_k - f||$")
+        axs[1][1].set(
+            title="Constraint violation", xlabel="$k$", ylabel="$||D^T J_k - f||$"
+        )
 
         axs[1][2].plot(dist_with_opt, label=alpha)
-        axs[1][2].set(title="Distance to an optimal solution", xlabel="$k$", ylabel="$||J_k - J^*||$")
+        axs[1][2].set(
+            title="Distance to an optimal solution",
+            xlabel="$k$",
+            ylabel="$||J_k - J^*||$",
+        )
 
-        for ax in axs:
-            ax.legend()
+        for ax_list in axs:
+            for ax in ax_list:
+                ax.legend()
         plt.show()
 
     return cost, quadratic_term, J, err, sol_graph
