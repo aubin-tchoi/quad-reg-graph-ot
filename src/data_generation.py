@@ -17,7 +17,7 @@ def add_random_weights(
     """
     # noinspection PyArgumentList
     for (_, __, w) in graph.edges(data=True):
-        w["weight"] = random.randint(0, 10)
+        w["weight"] = random.random()
 
     if plot:
         print("Plotting the weights on each edge.")
