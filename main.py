@@ -62,7 +62,7 @@ def run_all_algos() -> None:
         )
 
 
-def compare_algo_sinkhorn(graph_size: int = 6, graph_type: str = "path"):
+def compare_algo_sinkhorn(graph_size: int = 6, graph_type: str = "path") -> None:
     """
     Compares the algorithm with the cvxpy implementation on a bipartite graph.
     """
@@ -93,7 +93,7 @@ def compare_algo_sinkhorn(graph_size: int = 6, graph_type: str = "path"):
     print(json.dumps(results, indent=2))
 
 
-def monitor_algo_evolution(graph_size: int = 60, graph_type: str = "bipartite"):
+def monitor_algo_evolution(graph_size: int = 60, graph_type: str = "bipartite") -> None:
     """
     Plots various graph describing the behavior of the algorithm over the iterations.
     """
@@ -104,7 +104,7 @@ def monitor_algo_evolution(graph_size: int = 60, graph_type: str = "bipartite"):
     add_random_weights(graph, False)
     add_random_distributions(graph, False)
 
-    results = {alpha: {} for alpha in alphas}
+    results = {alpha: () for alpha in alphas}
     for alpha in alphas:
         print(f"\n ---- alpha: {alpha} ----")
         _, __, sol, ___ = basic_pipeline(
@@ -121,8 +121,12 @@ def monitor_algo_evolution(graph_size: int = 60, graph_type: str = "bipartite"):
         )
 
     # removing unserializable np.ndarray
-    for alpha in results.values():
-        alpha.pop("solutions")
+    for alpha, values in results.items():
+        results[alpha] = {
+            "cost": values[0],
+            "quadratic_term": values[1],
+            "error": values[3],
+        }
     print(json.dumps(results, indent=2))
 
 
