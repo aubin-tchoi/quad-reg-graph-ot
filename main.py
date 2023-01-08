@@ -130,7 +130,7 @@ def monitor_algo_evolution(graph_size: int = 60, graph_type: str = "bipartite") 
     print(json.dumps(results, indent=2))
 
 
-def complete_experiment() -> None:
+def complete_experiment(graph_type: str = "bipartite") -> None:
     """
     Runs an experiment with various graph sizes, various values of alpha
     and saves the results in both a pickle file and a json file.
@@ -144,13 +144,13 @@ def complete_experiment() -> None:
     results = {graph_size: {} for graph_size in graph_sizes}
     try:
         for graph_size in graph_sizes:
-            bipartite_graph = create_bipartite_graph(graph_size)
-            add_random_weights(bipartite_graph, plot=False)
+            graph = create_graph(graph_size, graph_type)
+            add_random_weights(graph, plot=False)
 
             for alpha in alphas:
                 print(f"\nGraph size: {graph_size}, alpha: {alpha}")
                 results[graph_size][alpha] = full_pipeline(
-                    bipartite_graph,
+                    graph,
                     n_runs_per_graph,
                     proportion_of_sink,
                     alpha=alpha,
