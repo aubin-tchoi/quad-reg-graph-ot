@@ -2,6 +2,8 @@
 The graphs generated for the experiments should be connected and bidirectional
 to ensure the feasibility of the optimization problem.
 """
+from enum import Enum
+
 import networkx as nx
 import numpy as np
 
@@ -73,6 +75,16 @@ def create_bipartite_graph(graph_size: int) -> nx.DiGraph:
                 f"Sparsity of the graph: {bipartite_graph.size() / len(bipartite_graph) ** 2 * 100:.2f}%."
             )
             return bipartite_graph.to_directed()
+
+
+class GraphType(Enum):
+    BIPARTITE: create_bipartite_graph
+    CYCLE: create_cycle_graph
+    PATH: create_path_graph
+    COMPLETE: create_complete_graph
+    WHEEL: create_wheel_graph
+    GNP_RANDOM: create_gnp_graph
+    WS_RANDOM: create_complete_graph
 
 
 def create_graph(graph_size: int, graph_type: str) -> nx.DiGraph():

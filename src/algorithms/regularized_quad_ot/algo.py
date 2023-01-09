@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
-from src.algorithms.graph_utils import extract_graph_info
+from src.algorithms.utils.graph_utils import extract_graph_info
 from src.algorithms.regularized_quad_ot.algo_utils import (
     initialize_algorithm,
     edge_added_to_active_set,

@@ -4,7 +4,7 @@ import cvxpy as cp
 import networkx as nx
 import numpy as np
 
-from src.algorithms.graph_utils import (
+from src.algorithms.utils import (
     extract_graph_info,
     add_ot_to_edges,
     recreate_ot_graph,
