@@ -51,6 +51,52 @@ def draw_non_uniqueness_example() -> None:
     plt.show()
 
 
+def show_example_impact_regularization() -> None:
+    """
+    Provides an example to show the impact of the quadratic regularization on a very small graph.
+    """
+    graph = nx.Graph()
+    graph.add_nodes_from(
+        [
+            (0, {"rho_1": 1, "rho_0": 0}),
+            (1, {"rho_1": 0, "rho_0": 0}),
+            (2, {"rho_1": 0, "rho_0": 0}),
+            (3, {"rho_1": 0, "rho_0": 0}),
+            (4, {"rho_1": 0, "rho_0": 0}),
+            (5, {"rho_1": 0, "rho_0": 1}),
+            (6, {"rho_1": 0, "rho_0": 0}),
+        ]
+    )
+    graph.add_edges_from(
+        [
+            (0, 1),
+            (0, 2),
+            (1, 6),
+            (6, 3),
+            (1, 4),
+            (2, 3),
+            (2, 6),
+            (6, 4),
+            (3, 5),
+            (4, 5),
+            (0, 6),
+            (6, 5),
+        ]
+    )
+    graph = graph.to_directed()
+    nx.set_edge_attributes(graph, 1, "weight")
+    alphas = [25, 10, 4, 2, 1, 0.5, 0.1]
+    for alpha in alphas:
+        basic_pipeline(
+            deepcopy(graph),
+            "cvxpy_reg",
+            plot=True,
+            alpha=alpha,
+            verbose=False,
+            gen_data=False,
+        )
+
+
 def run_all_algos() -> None:
     np.random.seed(0)
     n_nodes = 10
