@@ -26,7 +26,7 @@ def basic_pipeline(
     *args,
     **kwargs,
 ) -> Tuple[float, float, np.ndarray, float]:
-    pos = nx.spectral_layout(graph)
+    pos = nx.kamada_kawai_layout(graph)
 
     if gen_data:
         add_random_weights(graph, plot, pos)
