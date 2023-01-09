@@ -55,17 +55,21 @@ def add_random_distributions(
         rho_1 = np.random.random(n_nonzero)
         rho_1 = rho_1 / np.sum(rho_1)
 
-    nonzero_indexes = np.random.choice(len(graph), size=n_nonzero, replace=False)
-    j = 0
+    source_indexes = np.random.choice(len(graph), size=n_nonzero, replace=False)
+    sink_indexes = np.random.choice(len(graph), size=n_nonzero, replace=False)
+    source, sink = 0, 0
     # noinspection PyArgumentList
     for i, (_, w) in enumerate(graph.nodes(data=True)):
-        if i in nonzero_indexes:
-            w["rho_0"] = rho_0[j]
-            w["rho_1"] = rho_1[j]
-            j += 1
+        if i in source_indexes:
+            w["rho_1"] = rho_1[source]
+            source += 1
+        else:
+            w["rho_1"] = 0.0
+        if i in sink_indexes:
+            w["rho_0"] = rho_0[sink]
+            sink += 1
         else:
             w["rho_0"] = 0.0
-            w["rho_1"] = 0.0
 
     if plot:
         print("Plotting the two distributions on each node.")
