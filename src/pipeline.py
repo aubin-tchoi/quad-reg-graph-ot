@@ -137,6 +137,7 @@ def update_records(
     dist: float,
     quadratic_term: float,
     error: float,
+    sparsity: float,
     solution: np.ndarray,
     runtime: float,
 ) -> None:
@@ -149,6 +150,7 @@ def update_records(
         records["cost"] += dist
         records["quadratic_term"] += quadratic_term
         records["error"] += error
+        records["sparsity"] += sparsity
     records["runtime"] += runtime
     records["solutions"].append(solution)
 
@@ -167,6 +169,7 @@ def average_records(
         records["cost"] /= n_successful_runs
         records["quadratic_term"] /= n_successful_runs
         records["error"] /= n_successful_runs
+        records["sparsity"] /= n_successful_runs
 
     records["runtime"] /= n_runs_per_graph
 
@@ -195,6 +198,7 @@ def full_pipeline(
             "cost": 0.0,
             "quadratic_term": 0.0,
             "error": 0.0,
+            "sparsity": 0.0,
             "runtime": 0,
             "fails": 0,
             "solutions": [],
@@ -225,7 +229,7 @@ def full_pipeline(
                     f"cost: {dist:.2f}, quadratic term: {quad_term:.2f}, err: {err:.2f}, "
                     f"sparsity: {sparsity:.2f}, runtime: {runtime:.2f} s"
                 )
-                update_records(results[algo], dist, quad_term, err, sol, runtime)
+                update_records(results[algo], dist, quad_term, err, sparsity, sol, runtime)
         print("")
 
     for record in results.values():
