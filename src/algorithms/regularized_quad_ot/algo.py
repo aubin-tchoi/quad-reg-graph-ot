@@ -21,7 +21,7 @@ def regularized_quadratic_ot(
     always_print_stop_criteria: bool = True,
     plot_evolution: bool = True,
     optimal_sol: Optional[np.ndarray] = None,
-) -> Tuple[float, float, np.ndarray, float, nx.Graph]:
+) -> Tuple[float, float, np.ndarray, float, float, nx.Graph]:
     # retrieving the constants stored on the networkx graph
     n_edges, n_nodes, edges = graph.size(), len(graph), list(graph.edges())
     f, cost_vector, incidence_matrix = extract_graph_info(graph)
@@ -122,8 +122,9 @@ def regularized_quadratic_ot(
         np.zeros(n_edges),
     )
 
+    nonzero = np.count_nonzero(J)
     if verbose:
-        print(f"Optimal flow (number of nonzero: {np.count_nonzero(J)} / {n_edges}):")
+        print(f"Optimal flow (number of nonzero: {nonzero} / {n_edges}):")
         print(np.round(J, 2))
 
     edge_indexes = [e for e in graph.edges()]
@@ -147,7 +148,9 @@ def regularized_quadratic_ot(
         axs[0][1].set(title="Gradient norm evolution", xlabel="$k$", ylabel="$||s_k||$")
 
         axs[0][2].plot(n_non_zeros, label=alpha)
-        axs[0][2].set(title="Sparsity", xlabel="$k$", ylabel=r"$\frac{||J_k||_0}{|V|}$")
+        axs[0][2].set(
+            title="Nonzero ratio", xlabel="$k$", ylabel=r"$\frac{||J_k||_0}{|V|}$"
+        )
 
         axs[1][0].plot(costs, label=alpha)
         axs[1][0].set(title="Primal cost", xlabel="$k$", ylabel="$||c^T J_k||$")
@@ -169,4 +172,4 @@ def regularized_quadratic_ot(
                 ax.legend()
         plt.show()
 
-    return cost, quadratic_term, J, err, sol_graph
+    return cost, quadratic_term, J, err, 1 - nonzero / n_edges, sol_graph

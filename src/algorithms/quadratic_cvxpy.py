@@ -13,7 +13,7 @@ from src.algorithms.utils import (
 
 def regularized_j_wasserstein_1(
     graph: nx.Graph, alpha: float, verbose: bool = True
-) -> Tuple[float, float, np.ndarray, float, nx.Graph]:
+) -> Tuple[float, float, np.ndarray, float, float, nx.Graph]:
     """
     Computes the regularized Wasserstein-1 distance on a weighted graph that contains two distributions.
     Relies on an alternative formulation (the variable indicates the flow on each edge).
@@ -31,10 +31,9 @@ def regularized_j_wasserstein_1(
     )
     problem.solve(cp.ECOS)
 
+    nonzero = np.count_nonzero(flow.value)
     if verbose:
-        print(
-            f"Optimal flow (number of nonzero: {np.count_nonzero(flow.value)} / {n_edges}):"
-        )
+        print(f"Optimal flow (number of nonzero: {nonzero} / {n_edges}):")
         print(np.round(flow.value, 2))
 
     add_ot_to_edges(graph, flow.value)
@@ -44,4 +43,11 @@ def regularized_j_wasserstein_1(
     quadratic_term = float(np.sum(np.square(flow.value)))
     err = np.linalg.norm(incidence_matrix.T @ flow.value - f)
 
-    return cost, quadratic_term, np.array(flow.value), err, sol_graph
+    return (
+        cost,
+        quadratic_term,
+        np.array(flow.value),
+        err,
+        1 - nonzero / n_edges,
+        sol_graph,
+    )

@@ -17,7 +17,7 @@ def after_sinkhorn(
     cost_matrix: np.ndarray,
     f: np.ndarray,
     verbose: bool,
-) -> Tuple[float, float, np.ndarray, float, nx.Graph]:
+) -> Tuple[float, float, np.ndarray, float, float, nx.Graph]:
     if verbose:
         nonzero = np.count_nonzero(transportation_plan)
         print(
@@ -45,17 +45,17 @@ def after_sinkhorn(
     quadratic_term = float(np.sum(np.square(flow)))
     err = np.linalg.norm(nx.incidence_matrix(graph, oriented=True).toarray() @ flow - f)
 
+    nonzero = np.count_nonzero(flow)
     if verbose:
-        nonzero = np.count_nonzero(flow)
         print(f"Optimal flow (number of nonzero: {nonzero} / {graph.size()}):")
         print(np.round(flow, 2))
 
-    return cost, quadratic_term, flow, err, collected_graph
+    return cost, quadratic_term, flow, err, 1 - nonzero / graph.size(), collected_graph
 
 
 def sinkhorn(
     graph: nx.Graph, alpha: float, verbose: bool = True
-) -> Tuple[float, float, np.ndarray, float, nx.Graph]:
+) -> Tuple[float, float, np.ndarray, float, float, nx.Graph]:
 
     epsilon = alpha
 
@@ -92,7 +92,7 @@ def sinkhorn(
 
 def stable_sinkhorn(
     graph: nx.Graph, alpha: float, verbose: bool = True
-) -> Tuple[float, float, np.ndarray, float, nx.Graph]:
+) -> Tuple[float, float, np.ndarray, float, float, nx.Graph]:
 
     epsilon = alpha
 

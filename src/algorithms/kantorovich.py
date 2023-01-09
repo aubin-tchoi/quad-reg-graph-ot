@@ -13,7 +13,7 @@ def t_wasserstein_1(
     verbose: bool = True,
     return_uncollected_graph: bool = False,
     alpha: float = 1.0,
-) -> Tuple[float, float, np.ndarray, float, nx.Graph]:
+) -> Tuple[float, float, np.ndarray, float, float, nx.Graph]:
     """
     Computes the Wasserstein-1 distance on a weighted graph that contains two distributions.
     Relies on the Kantorovich formulation (the variable is the transportation map between each pair of nodes).
@@ -60,8 +60,8 @@ def t_wasserstein_1(
     flow = np.array(list(nx.get_edge_attributes(collected_graph, "ot").values()))
     quadratic_term = float(np.sum(np.square(flow)))
 
+    nonzero = np.count_nonzero(flow)
     if verbose:
-        nonzero = np.count_nonzero(flow)
         print(f"Optimal flow (number of nonzero: {nonzero} / {graph.size()}):")
         print(np.round(flow, 2))
 
@@ -79,6 +79,7 @@ def t_wasserstein_1(
             problem.value,
             quadratic_term,
             flow,
-            0.,
+            0.0,
+            1 - nonzero / graph.size(),
             collected_graph,
         )
