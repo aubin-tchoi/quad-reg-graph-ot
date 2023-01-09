@@ -204,7 +204,7 @@ def complete_experiment(graph_type: str = "bipartite") -> None:
                 )
     # you can stop the execution using a CTRL+C
     except KeyboardInterrupt:
-        pass
+        print("\nExecution interrupted, saving the results.")
 
     identifier = sys.argv[1] if len(sys.argv) > 1 else "bipartite"
     identifier += "_" if identifier else ""
@@ -212,7 +212,7 @@ def complete_experiment(graph_type: str = "bipartite") -> None:
     pickle_file_path = (
         f"data/results_{identifier}{f'{datetime.now():%m_%d-%H_%M}'}.pickle"
     )
-    print(f"Saving the data in a pickle file '{pickle_file_path}'.")
+    print(f"\nSaving the data in a pickle file '{pickle_file_path}'.")
     with open(pickle_file_path, "wb+") as handle:
         pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
