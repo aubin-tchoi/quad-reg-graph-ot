@@ -23,7 +23,7 @@ def add_random_weights(
         print("Plotting the weights on each edge.")
         plt.figure()
 
-        positions = positions or nx.spectral_layout(graph)
+        positions = positions or nx.kamada_kawai_layout(graph)
         edge_labels = {(u, v): weight for u, v, weight in graph.edges.data("weight")}
 
         nx.draw_networkx_edge_labels(graph, positions, edge_labels=edge_labels)
@@ -73,7 +73,7 @@ def add_random_distributions(
 
     if plot:
         print("Plotting the two distributions on each node.")
-        positions = positions or nx.spectral_layout(graph)
+        positions = positions or nx.kamada_kawai_layout(graph)
         plt.figure(figsize=(14, 7))
 
         ax1 = plt.subplot(121)
