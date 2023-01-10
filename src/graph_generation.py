@@ -98,7 +98,11 @@ def create_graph(graph_size: int, graph_type: str) -> nx.DiGraph():
         if graph_type == "cycle"
         else create_path_graph(graph_size)
         if graph_type == "path"
+        else create_wheel_graph(graph_size)
+        if graph_type == "wheel"
         else create_complete_graph(graph_size)
         if graph_type == "complete"
         else create_gnp_graph(graph_size)
+        if graph_type == "gnp"
+        else create_watts_strogatz_graph(graph_size)
     )
