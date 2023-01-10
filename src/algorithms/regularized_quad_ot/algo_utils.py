@@ -18,7 +18,10 @@ def edge_added_to_active_set(
     edge_added: int,
     n_nodes: int,
     updated_edges: Set[Tuple[int, int]],
-):
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Identifies if an edge added to the active set merges two components or not and updates every variable accordingly.
+    """
     updated_edges.add(edges[edge_added])
 
     L += np.outer(D[edge_added], D[edge_added].T)
@@ -64,7 +67,11 @@ def edge_removed_from_active_set(
     edge_removed: int,
     n_nodes: int,
     updated_edges: Set[Tuple[int, int]],
-):
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Identifies if an edg removed from the active set splits a component in two or not and updates every variable
+    accordingly.
+    """
     updated_edges.remove(edges[edge_removed])
 
     L -= np.outer(D[edge_removed], D[edge_removed].T)
@@ -108,7 +115,12 @@ def edge_removed_from_active_set(
     return L, N, R
 
 
-def initialize_algorithm(D, c, n_nodes: int, edges: List[Tuple[int, int]]):
+def initialize_algorithm(
+    D, c, n_nodes: int, edges: List[Tuple[int, int]]
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Initializes every variable in the algorithm.
+    """
     # randomly initializing the dual variable
     p = 10 * np.random.random(size=(n_nodes,))
 

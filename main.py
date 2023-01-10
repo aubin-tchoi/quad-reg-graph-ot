@@ -1,3 +1,7 @@
+"""
+Main file for the project.
+Every function of this file can be considered as an entry-point for an experiment.
+"""
 import json
 import pickle
 import sys
@@ -97,14 +101,23 @@ def show_example_impact_regularization() -> None:
         )
 
 
-def run_all_algos() -> None:
+def run_all_algos(graph_size: int = 60, graph_type: str = "path") -> None:
+    """
+    Runs all the algorithms on a same graph with randomly generated data.
+    """
     np.random.seed(0)
-    n_nodes = 10
-    path_graph = nx.path_graph(n_nodes).to_directed()
+    graph = create_graph(graph_size, graph_type)
+    add_random_weights(graph)
+    add_random_distributions(graph)
 
     for algo_choice in choose_algo:
         basic_pipeline(
-            deepcopy(path_graph), algo_choice, plot=False, alpha=5, verbose=False
+            deepcopy(graph),
+            algo_choice,
+            plot=False,
+            alpha=5,
+            verbose=False,
+            gen_data=False,
         )
 
 
@@ -133,7 +146,6 @@ def compare_algo_sinkhorn(graph_size: int = 6, graph_type: str = "path") -> None
             alpha=alpha,
             verbose=False,
             gen_data=False,
-            plot=True,
         )
 
     print(json.dumps(results, indent=2))
@@ -176,7 +188,9 @@ def monitor_algo_evolution(graph_size: int = 60, graph_type: str = "bipartite") 
     print(json.dumps(results, indent=2))
 
 
-def complete_experiment(graph_type: str = "bipartite") -> None:
+def complete_experiment(
+    graph_type: str = "bipartite", save_results: bool = True
+) -> None:
     """
     Runs an experiment with various graph sizes, various values of alpha
     and saves the results in both a pickle file and a json file.
@@ -204,24 +218,29 @@ def complete_experiment(graph_type: str = "bipartite") -> None:
                 )
     # you can stop the execution using a CTRL+C
     except KeyboardInterrupt:
-        print("\nExecution interrupted, saving the results.")
+        print(
+            f"\nExecution interrupted, {'saving the results' if save_results else 'exiting'}."
+        )
 
-    identifier = sys.argv[1] if len(sys.argv) > 1 else "bipartite"
-    identifier += "_" if identifier else ""
+    if save_results:
+        identifier = sys.argv[1] if len(sys.argv) > 1 else graph_type
+        identifier += "_" if identifier else ""
 
-    pickle_file_path = (
-        f"data/results_{identifier}{f'{datetime.now():%m_%d-%H_%M}'}.pickle"
-    )
-    print(f"\nSaving the data in a pickle file '{pickle_file_path}'.")
-    with open(pickle_file_path, "wb+") as handle:
-        pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        pickle_file_path = (
+            f"data/results_{identifier}{f'{datetime.now():%m_%d-%H_%M}'}.pickle"
+        )
+        print(f"\nSaving the data in a pickle file '{pickle_file_path}'.")
+        with open(pickle_file_path, "wb+") as handle:
+            pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    json_file_path = f"data/results_{identifier}{f'{datetime.now():%m_%d-%H_%M}'}.json"
-    print(f"Saving the data in a json file '{json_file_path}'.")
-    remove_np_arrays(results)
+        json_file_path = (
+            f"data/results_{identifier}{f'{datetime.now():%m_%d-%H_%M}'}.json"
+        )
+        print(f"Saving the data in a json file '{json_file_path}'.")
+        remove_np_arrays(results)
 
-    with open(json_file_path, "w+", encoding="utf-8") as f:
-        json.dump(results, f, ensure_ascii=False, indent=4)
+        with open(json_file_path, "w+", encoding="utf-8") as f:
+            json.dump(results, f, ensure_ascii=False, indent=4)
 
 
 if __name__ == "__main__":

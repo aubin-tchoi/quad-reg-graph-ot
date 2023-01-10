@@ -2,6 +2,9 @@ import numpy as np
 
 
 def cholesky(R: np.ndarray, x: np.ndarray, sign: bool) -> np.ndarray:
+    """
+    Cholesky update or downdate (depending on the sign, True for an update, False for a downdate).
+    """
     p = np.size(x)
     x_transpose = x.T.copy()
     factor = 2 * int(sign) - 1
@@ -16,8 +19,14 @@ def cholesky(R: np.ndarray, x: np.ndarray, sign: bool) -> np.ndarray:
 
 
 def cholupdate(R: np.ndarray, x: np.ndarray) -> np.ndarray:
+    """
+    Cholesky update.
+    """
     return cholesky(R, x, True)
 
 
 def choldowndate(R: np.ndarray, x: np.ndarray) -> np.ndarray:
+    """
+    Cholesky downdate.
+    """
     return cholesky(R, x, False)

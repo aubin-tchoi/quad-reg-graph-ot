@@ -26,6 +26,16 @@ def basic_pipeline(
     *args,
     **kwargs,
 ) -> Tuple[float, float, np.ndarray, float]:
+    """
+    Basic pipeline that runs a single algorithm on a graph.
+    Relays argument to the function that runs the method through the args and kwargs.
+
+    Args:
+        graph: The graph to run the method on.
+        algo_choice: A string that indicates the method to use. Refer to choose_algo for link between name and function.
+        plot: Whether the initial data and output transport plan should be displayed or not.
+        gen_data: Whether random data should be generated on the graph or not.
+    """
     pos = nx.kamada_kawai_layout(graph)
 
     if gen_data:
@@ -54,6 +64,16 @@ def comparison_pipeline(
     *args,
     **kwargs,
 ) -> Dict[str, Dict[str, Union[float, float, np.ndarray, float]]]:
+    """
+    Pipeline that runs a list of algorithms on a graph for comparison.
+    Relays argument to the function that runs the method through the args and kwargs.
+
+    Args:
+        graph: The graph to run the method on.
+        algo_choices: Strings that indicate the method to use. Refer to choose_algo for link between name and function.
+        plot: Whether the initial data and output transport plan should be displayed or not.
+        gen_data: Whether random data should be generated on the graph or not.
+    """
     timer = checkpoint()
     results = {}
     pos = nx.spectral_layout(graph)
@@ -91,12 +111,28 @@ def comparison_pipeline(
 
 
 def timed_pipeline(
-    graph: nx.Graph, algo_choice: str, plot: bool = True, *args, **kwargs
+    graph: nx.Graph,
+    algo_choice: str,
+    plot: bool = True,
+    gen_data: bool = True,
+    *args,
+    **kwargs,
 ) -> Tuple[float, float, np.ndarray, float, float]:
+    """
+    Basic pipeline that runs a single algorithm on a graph and displays its execution time.
+    Relays argument to the function that runs the method through the args and kwargs.
+
+    Args:
+        graph: The graph to run the method on.
+        algo_choice: A string that indicates the method to use. Refer to choose_algo for link between name and function.
+        plot: Whether the initial data and output transport plan should be displayed or not.
+        gen_data: Whether random data should be generated on the graph or not.
+    """
     pos = nx.spectral_layout(graph)
 
-    add_random_weights(graph, plot, pos)
-    add_random_distributions(graph, plot, pos)
+    if gen_data:
+        add_random_weights(graph, plot, pos)
+        add_random_distributions(graph, plot, pos)
 
     print(f"Running algo {algo_choice}")
     runtime, (dist, quad_term, sol, err, sparsity, sol_graph) = return_runtime(
@@ -115,6 +151,15 @@ def timed_pipeline(
 
 @timeit
 def kanto_pipeline(graph: nx.Graph, plot: bool = True, gen_data: bool = True) -> None:
+    """
+    Pipeline specific to the Kantorovich formulation that displays the fact that the solution has to be put back
+    on the actual edges using the shortest paths.
+
+    Args:
+        graph: The graph to run the method on.
+        plot: Whether the initial data and output transport plan should be displayed or not.
+        gen_data: Whether random data should be generated on the graph or not.
+    """
     pos = nx.spectral_layout(graph)
 
     if gen_data:
@@ -192,7 +237,16 @@ def remove_np_arrays(
 def full_pipeline(
     graph: nx.Graph, n_runs_per_graph: int, nonzero_ratio: float, *args, **kwargs
 ) -> Dict[str, Union[float, int, List[np.ndarray]]]:
-    exclude_sinkhorn = True
+    """
+    Complete pipeline that runs all the algorithms on a graph and logs various averaged metrics.
+    Relays argument to the function that runs the method through the args and kwargs.
+
+    Args:
+        graph: The graph to run the method on.
+        n_runs_per_graph: Number of runs to perform on each graph.
+        nonzero_ratio: The proportion of nodes that will be sinks or sources.
+    """
+    exclude_sinkhorn = False
     results = {
         algo: {
             "cost": 0.0,
@@ -229,7 +283,9 @@ def full_pipeline(
                     f"cost: {dist:.2f}, quadratic term: {quad_term:.2f}, err: {err:.2f}, "
                     f"sparsity: {sparsity:.2f}, runtime: {runtime:.2f} s"
                 )
-                update_records(results[algo], dist, quad_term, err, sparsity, sol, runtime)
+                update_records(
+                    results[algo], dist, quad_term, err, sparsity, sol, runtime
+                )
         print("")
 
     for record in results.values():

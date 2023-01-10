@@ -18,6 +18,9 @@ def after_sinkhorn(
     f: np.ndarray,
     verbose: bool,
 ) -> Tuple[float, float, np.ndarray, float, float, nx.Graph]:
+    """
+    Formats the output of either version of Sinkhorn algorithm.
+    """
     if verbose:
         nonzero = np.count_nonzero(transportation_plan)
         print(
@@ -56,7 +59,9 @@ def after_sinkhorn(
 def sinkhorn(
     graph: nx.Graph, alpha: float, verbose: bool = True
 ) -> Tuple[float, float, np.ndarray, float, float, nx.Graph]:
-
+    """
+    Computes the entropically-regularized Wasserstein-1 distance on a weighted graph using Sinkhorn algorithm.
+    """
     epsilon = alpha
 
     n_nodes = len(graph)
@@ -93,7 +98,10 @@ def sinkhorn(
 def stable_sinkhorn(
     graph: nx.Graph, alpha: float, verbose: bool = True
 ) -> Tuple[float, float, np.ndarray, float, float, nx.Graph]:
-
+    """
+    Computes the entropically-regularized Wasserstein-1 distance on a weighted graph using a version of Sinkhorn
+    algorithm in log domain stabilized using a log-sum-exp trick.
+    """
     epsilon = alpha
 
     n_nodes = len(graph)

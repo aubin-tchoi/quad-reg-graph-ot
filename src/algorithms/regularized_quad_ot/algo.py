@@ -22,6 +22,20 @@ def regularized_quadratic_ot(
     plot_evolution: bool = True,
     optimal_sol: Optional[np.ndarray] = None,
 ) -> Tuple[float, float, np.ndarray, float, float, nx.Graph]:
+    """
+    Computes the quadratically-regularized optimal transport problem using the method proposed in the article.
+
+    Args:
+        graph: The graph to work on.
+        alpha: Parameter of the regularization.
+        eps: Tolerance used in the stopping criterion on the norm of the gradient.
+        max_iter: Maximum number of iterations allowed.
+        verbose: Logs the gradient norm at every iteration, the reason for stopping the algorithm and the solution.
+        always_print_stop_criteria: Parameter that overrides the verbose when it comes to the reason for stopping.
+        plot_evolution: Whether plots that retraces the evolution of the method should be displayed or not.
+        optimal_sol: An optimal solution of the problem, useful in the plots to compute the distance between this
+            solution and the current solution.
+    """
     # retrieving the constants stored on the networkx graph
     n_edges, n_nodes, edges = graph.size(), len(graph), list(graph.edges())
     f, cost_vector, incidence_matrix = extract_graph_info(graph)

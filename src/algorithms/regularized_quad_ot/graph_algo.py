@@ -6,6 +6,11 @@ import numpy as np
 def weakly_connected_components(
     n_nodes: int, edges: Iterable[Tuple[int, int]], verbose: bool = False
 ) -> List[List[int]]:
+    """
+    Computes the weakly connected component of a graph based on a list of its edges.
+    This function was reimplemented because the equivalent nx.weakly_connected_components will by default consider
+    all the edges of the graph, and we want to restrict our version to the active set.
+    """
     if verbose:
         print("\nComputing the weakly connected components.\nEdges:")
         print(edges)
@@ -22,6 +27,9 @@ def weakly_connected_components(
     visited = [False for _ in range(n_nodes)]
 
     def dfs(parent_node: int, children_nodes: List[int]) -> List[int]:
+        """
+        Deep-first search.
+        """
         visited[parent_node] = True
         children_nodes.append(parent_node)
         for children_node in adjacency_matrix[parent_node]:
@@ -47,6 +55,10 @@ def weakly_connected_components(
 
 
 def normalized_flood_fill(n_nodes: int, edges: List[Tuple[int, int]]) -> np.ndarray:
+    """
+    Computes the normalized flood fill. Useful to initialize N by providing an orthogonal basis for the null space of
+    the Lagrangian Lk.
+    """
     N = np.array([], dtype=float).reshape(n_nodes, 0)
     for connected_component in weakly_connected_components(n_nodes, edges):
         col = (
